@@ -1,0 +1,16 @@
+{
+  "name": "PolyCode Run",
+  "short_name": "PolyCode Run",
+  "description": "Plateforme de codage mobile pour MPCI",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0078d4",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

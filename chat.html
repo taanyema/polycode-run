@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aide IA - PolyCode Pro</title>
+    <link rel="stylesheet" href="chat.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="chat-header">
+        <h2>Aide IA - PolyCode Pro</h2>
+        <button onclick="exportChatToMarkdown()" style="background:transparent; border:none; color:white; cursor:pointer; font-size:18px;">💾</button>
+        <button class="close-btn" onclick="closeAIChat()">×</button>
+    </div>
+
+    <!-- Zone de messages qui prend toute la place -->
+    <div id="chat-messages" class="chat-messages"></div>
+
+    <!-- Zone de saisie qui restera en bas -->
+    <div class="chat-input-area">
+        <!-- Remplace l'input par un textarea -->
+        <textarea id="user-input" placeholder="Posez votre question..."></textarea>
+        <button onclick="sendMessage()">Envoyer</button>
+    </div>
+
+    <script type="module" src="ai-chat/chat.js"></script>
+</body>
+</html>

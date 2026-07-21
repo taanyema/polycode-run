@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PolyCode Pro - Terminal Home</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0078d4">
+    <link rel="icon" type="image/png" href="icon.png">
+    
+    <!-- Liens vers tes fichiers séparés -->
+    <link rel="stylesheet" href="style.css">
+    
+    <link id="prism-theme" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-matlab.min.js"></script>
+</head>
+<body oncontextmenu="return false;">
+
+    <div id="drawer-overlay" class="drawer-overlay" onclick="toggleMenu()"></div>
+    <div id="drawer">
+        <h3 style="margin-top:0;">⚙️ Options PolyCode</h3>
+        <div class="drawer-section">
+            <h4>Fichiers & Cloud</h4>
+            <div class="menu-item">📂 Gestion Multi-Tabs</div>
+            <div class="menu-item">☁️ Synchronisation Cloud</div>
+            <div class="menu-item">📄 Exporter en PDF</div>
+            <div class="menu-item">📥 Importer URL</div>
+        </div>
+        <div class="drawer-section">
+            <h4>Élite Tools</h4>
+            <div class="menu-item">🎙️ Dictée Vocale Code</div>
+            <div class="menu-item">📝 Formatteur Automatique</div>
+            <div class="menu-item">🔍 Recherche / Remplacer</div>
+            <div class="menu-item">⚡ Mode Performance Turbo</div>
+        </div>
+        <div class="drawer-section">
+            <h4>Sécurité</h4>
+            <div class="menu-item">🔌 Économie de Données</div>
+            <div class="menu-item">🔐 Coffre-fort API</div>
+        </div>
+    </div>
+
+    <div class="header" style="display: flex; align-items: center; justify-content: space-between; padding: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <button onclick="toggleMenu()" style="border:none; background:none; font-size:20px; color:white; padding:0; cursor:pointer;">☰</button>
+            <img src="https://i.ibb.co/Vp6Yf0p/PC-Logo.png" style="width: 25px; height: 25px;">
+            <b style="font-size: 14px; white-space: nowrap;">PolyCode Pro</b>
+        </div>
+        <div style="display: flex; align-items: center; gap: 4px;">
+            <button id="langBtn" onclick="toggleLanguage()" style="padding: 6px; font-weight: bold; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 6px;">🇫🇷</button>
+
+            <button id="btnAide" onclick="openAIChat()" style="background: #238636; color:white; border:none; padding: 6px 8px; font-size: 11px; font-weight: bold;">+ Aide IA</button>
+            <button onclick="toggleTheme()" style="padding: 6px;">🌓</button>
+            <button id="btnCopy" onclick="copierCode()" style="padding: 6px;">📋</button>
+            <button id="btnCalc" onclick="ouvrirCalculatrice()" style="padding: 6px;">🔢</button>
+            <button onclick="deconnexion()" style="background:#f85149; color:white; border:none; padding: 6px;">🚪</button>
+        </div>
+    </div>
+
+    <div id="userDisplay" style="font-size: 10px; color: #58a6ff; padding: 5px 10px;"></div>
+
+    <div id="loginModal" class="modal" style="display: flex;">
+        <div class="modal-content" style="text-align: center;">
+            <div style="font-size: 10px; color: #f85149; margin-bottom: 10px;">🔒 ACCÈS SÉCURISÉ BURKINA</div>
+            <h2>🚀 Terminal Home</h2>
+            <input type="text" id="userName" placeholder="Nom complet" style="width:100%; padding:10px; margin-bottom:10px; background:var(--bg); color:white; border:1px solid var(--border);">
+            <input type="email" id="userEmail" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px; background:var(--bg); color:white; border:1px solid var(--border);">
+            <input type="password" id="userPass" placeholder="Mot de passe" style="width:100%; padding:10px; margin-bottom:15px; background:var(--bg); color:white; border:1px solid var(--border);">
+            <button onclick="saveUser()" style="width:100%; background:#238636; color:white; padding:12px; font-weight:bold;">S'INSCRIRE / CONNECTER</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <select id="language" onchange="updateColor()">
+            <option value="python3">🐍 Python</option>
+            <option value="c">©️ Langage C</option>
+            <option value="cpp">🔹 C++</option>
+            <option value="java">☕ Java</option>
+            <option value="octave">📉 Octave (Scilab)</option>
+        </select>
+        <button onclick="changeFontSize(-2)">A-</button>
+        <button onclick="changeFontSize(2)">A+</button>
+        <button onclick="toggleStdin()">📋 STDIN</button>
+        <button onclick="loadTemplate()">Exemple</button>
+        <button onclick="clearEditor()">🗑️</button>
+        <button class="btn-run" onclick="runCode()">LANCER ▶</button>
+    </div>
+    
+    <!-- Zone STDIN (Entrées) rétractable -->
+    <div id="stdin-wrapper">
+        <textarea id="userInput" placeholder="Entrées (STDIN)..." style="width:100%; height:60px; background:var(--card); color:white; border:1px solid var(--border); padding:8px; border-radius:4px; box-sizing:border-box;"></textarea>
+    </div>
+
+    <!-- Remplace ton bloc editor-container actuel par ceci -->
+    <div id="editor-container">
+        <div id="line-numbers">1</div>
+        <div id="editor-wrapper">
+            <pre id="highlighting" aria-hidden="true"><code id="highlighting-content"></code></pre>
+            <textarea id="editor" spellcheck="false"></textarea>
+        </div>
+    </div>
+    
+    <div class="toolbar">
+        <button class="sym-btn" onclick="insert('    ')">TAB</button>
+        <button class="sym-btn" onclick="insert('(')">(</button>
+        <button class="sym-btn" onclick="insert(')')">)</button>
+        <button class="sym-btn" onclick="insert('{')">{</button>
+        <button class="sym-btn" onclick="insert('}')">}</button>
+        <button class="sym-btn" onclick="insert(';')">;</button>
+        <button class="sym-btn" onclick="insert(':')">:</button>
+        <button class="sym-btn" onclick="insert('\'')">'</button>
+        <button class="sym-btn" onclick="insert('&quot;')">"</button>
+        <button class="sym-btn" onclick="insert('=')">=</button>
+    </div>
+
+    <!-- Fenêtre console plein écran -->
+    <div id="fullscreen-console" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#121212; z-index:9999; padding:20px; box-sizing:border-box; overflow-y:auto;">
+    <button onclick="closeConsole()" style="width:100%; padding:15px; background:#f85149; color:white; border:none; border-radius:5px; font-weight:bold; margin-bottom:15px;">FERMER LA CONSOLE</button>
+    <pre id="fullscreen-output" style="color:#7ee787; font-family:monospace; white-space:pre-wrap; font-size: 14px;"></pre>
+    </div>
+
+    <div id="chart-container" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: #0d1117; border-top: 1px solid var(--border);">
+        <canvas id="myChart" style="width:100%; height:200px; padding: 10px;"></canvas>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+    
+    <!-- Script principal -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>
