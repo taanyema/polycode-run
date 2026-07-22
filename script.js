@@ -75,16 +75,19 @@ let polyChart = null;
 window.runCode = async () => {
     const fullscreenDiv = document.getElementById('fullscreen-console');
     const out = document.getElementById('fullscreen-output');
+    const graphContainer = document.getElementById('graph-container');
+    const plotImage = document.getElementById('plot-image');
     
     fullscreenDiv.style.display = 'block';
     out.innerText = "⏳ Exécution en cours via le serveur sécurisé...";
+    if (graphContainer) graphContainer.style.display = 'none';
 
     const code = document.getElementById('editor').value;
     const inputData = document.getElementById('userInput').value;
     const pLang = document.getElementById('language').value; 
 
     try {
-        // Envoi direct à votre serveur Flask (qui cache les clés JDoodle)
+        // Envoi direct à votre serveur Flask (qui gère l'exécution locale pour Octave/Scilab et JDoodle pour le reste)
         const response = await fetch("https://polycode-api.onrender.com/run", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -97,16 +100,32 @@ window.runCode = async () => {
 
         const data = await response.json();
 
-        if (data.output) {
+        // 1. Affichage du texte dans la console plein écran
+        if (data.output !== undefined) {
             out.innerText = data.output;
+            out.style.color = "#7ee787";
+        } else if (data.result !== undefined) {
+            out.innerText = data.result;
             out.style.color = "#7ee787";
         } else {
             out.innerText = "⚠️ Erreur : " + (data.error || JSON.stringify(data));
             out.style.color = "#f85149";
         }
+
+        // 2. Gestion automatique de l'affichage du graphique s'il y en a un (retourné en Base64 par Flask)
+        if (graphContainer && plotImage) {
+            if (data.image) {
+                plotImage.src = 'data:image/png;base64,' + data.image;
+                graphContainer.style.display = 'block';
+            } else {
+                graphContainer.style.display = 'none';
+            }
+        }
+
     } catch (e) {
         out.innerText = "🚨 Erreur de connexion au serveur d'exécution.";
         out.style.color = "#f85149";
+        if (graphContainer) graphContainer.style.display = 'none';
     }
 };
 
@@ -392,6 +411,7 @@ window.addEventListener("load", () => {
 
 console.log("SCRIPT CHARGÉ AVEC SCROLL PRO OPTIMISÉ !");
 console.log(typeof window.toggleStdin);
+
 // Enregistrement du Service Worker pour PWA
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
