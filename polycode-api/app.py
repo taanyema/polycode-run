@@ -26,12 +26,11 @@ def run_code():
             has_plot = bool(re.search(r'\b(plot|fplot|bar|hist|scatter|contour|surf|mesh|stem|ezplot)\b', script, re.IGNORECASE))
             
             if has_plot:
-                # Mode Graphique : Désactivation explicite du terminal ASCII via GNUTERM=unknown
+                # On redirige le rendu brut vers /dev/null pour bloquer le texte ASCII sans message d'erreur
                 wrapped_code = f"""
 more off;
 warning('off', 'all');
 graphics_toolkit("gnuplot");
-setenv("GNUTERM", "unknown");
 
 {script}
 
@@ -51,7 +50,7 @@ catch
 end_try_catch
 """
             else:
-                # Mode 100% Texte : Aucun toolkit chargé
+                # Mode 100% Texte
                 wrapped_code = f"""
 more off;
 warning('off', 'all');
@@ -64,7 +63,7 @@ close all;
             with open(script_path, "w", encoding="utf-8") as f:
                 f.write(wrapped_code)
 
-            # Exécution Octave pure sans GUI
+            # Execution Octave
             result = subprocess.run(
                 ["octave-cli", "--no-gui", "--silent", script_path],
                 input=user_stdin,
@@ -73,21 +72,21 @@ close all;
                 timeout=10
             )
             
-            # Nettoyage strict de la sortie stdout pour éliminer tout résidu ASCII
+            # Nettoyage strict de stdout / stderr
             raw_out = result.stdout + result.stderr
             clean_lines = []
             ascii_chars = ("|", "+", "-", "*", "$", "%")
             
             for line in raw_out.splitlines():
                 stripped = line.strip()
-                # Filtrer les avertissements système et le rendu ASCII de gnuplot
-                if not any(k in line for k in ["disabling GUI", "X11", "#####", "terminal set to", "unknown"]) and \
-                   not (has_plot and stripped.startswith(ascii_chars)):
-                    clean_lines.append(line)
+                # Filtrer les avertissements gnuplot, GUI et graphiques ASCII
+                if not any(k in line for k in ["disabling GUI", "X11", "#####", "terminal set to", "No output will be generated"]):
+                    if not (has_plot and stripped.startswith(ascii_chars)):
+                        clean_lines.append(line)
                     
             output = "\n".join(clean_lines).strip()
 
-            # Traitement de l'image PNG si elle a été générée
+            # Traitement de l'image PNG
             image_path = "/tmp/output_plot.png"
             if has_plot and os.path.exists(image_path):
                 with open(image_path, "rb") as img_file:
