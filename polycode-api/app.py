@@ -26,11 +26,12 @@ def run_code():
             has_plot = bool(re.search(r'\b(plot|fplot|bar|hist|scatter|contour|surf|mesh|stem|ezplot)\b', script, re.IGNORECASE))
             
             if has_plot:
-                # Mode Graphique : Désactivation explicite du terminal ASCII via "set terminal unknown"
+                # Mode Graphique : Désactivation explicite du terminal ASCII via GNUTERM=unknown
                 wrapped_code = f"""
 more off;
 warning('off', 'all');
 graphics_toolkit("gnuplot");
+setenv("GNUTERM", "unknown");
 
 {script}
 
@@ -50,7 +51,7 @@ catch
 end_try_catch
 """
             else:
-                # Mode 100% Texte : Aucun toolkit chargé, pas de résidus ASCII
+                # Mode 100% Texte : Aucun toolkit chargé
                 wrapped_code = f"""
 more off;
 warning('off', 'all');
@@ -63,7 +64,7 @@ close all;
             with open(script_path, "w", encoding="utf-8") as f:
                 f.write(wrapped_code)
 
-            # Execution Octave pure sans GUI
+            # Exécution Octave pure sans GUI
             result = subprocess.run(
                 ["octave-cli", "--no-gui", "--silent", script_path],
                 input=user_stdin,
@@ -72,16 +73,21 @@ close all;
                 timeout=10
             )
             
-            # Nettoyage serveur des messages système indésirables
+            # Nettoyage strict de la sortie stdout pour éliminer tout résidu ASCII
             raw_out = result.stdout + result.stderr
             clean_lines = []
+            ascii_chars = ("|", "+", "-", "*", "$", "%")
+            
             for line in raw_out.splitlines():
-                # On filtre les éventuels avertissements système
-                if not any(k in line for k in ["disabling GUI", "X11", "#####", "terminal set to"]):
+                stripped = line.strip()
+                # Filtrer les avertissements système et le rendu ASCII de gnuplot
+                if not any(k in line for k in ["disabling GUI", "X11", "#####", "terminal set to", "unknown"]) and \
+                   not (has_plot and stripped.startswith(ascii_chars)):
                     clean_lines.append(line)
+                    
             output = "\n".join(clean_lines).strip()
 
-            # Traitement de l'image si elle a été générée
+            # Traitement de l'image PNG si elle a été générée
             image_path = "/tmp/output_plot.png"
             if has_plot and os.path.exists(image_path):
                 with open(image_path, "rb") as img_file:
@@ -125,7 +131,7 @@ close all;
             if compile_res.returncode != 0:
                 output = "Erreur de compilation :\n" + compile_res.stderr
             else:
-                run_res = subprocess.run([exe_path], input=run_res.stdin if 'run_res' in locals() else user_stdin, capture_output=True, text=True, timeout=10)
+                run_res = subprocess.run([exe_path], input=user_stdin, capture_output=True, text=True, timeout=10)
                 output = run_res.stdout + run_res.stderr
 
         elif language == "java":
