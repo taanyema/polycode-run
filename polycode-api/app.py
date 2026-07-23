@@ -22,15 +22,15 @@ def run_code():
 
     try:
         if language == "octave":
+            # Détecter si le code contient des commandes de tracé graphique
             has_plot = bool(re.search(r'\b(plot|fplot|bar|hist|scatter|contour|surf|mesh|stem|ezplot)\b', script, re.IGNORECASE))
             
             if has_plot:
-                # On désactive le rafraîchissement d'affichage gnuplot (offscreen rendering)
+                # On redirige le rendu brut vers /dev/null pour bloquer le texte ASCII sans message d'erreur
                 wrapped_code = f"""
 more off;
 warning('off', 'all');
 graphics_toolkit("gnuplot");
-drawnow("off");
 
 {script}
 
@@ -50,6 +50,7 @@ catch
 end_try_catch
 """
             else:
+                # Mode 100% Texte
                 wrapped_code = f"""
 more off;
 warning('off', 'all');
@@ -62,6 +63,7 @@ close all;
             with open(script_path, "w", encoding="utf-8") as f:
                 f.write(wrapped_code)
 
+            # Execution Octave
             result = subprocess.run(
                 ["octave-cli", "--no-gui", "--silent", script_path],
                 input=user_stdin,
@@ -70,29 +72,21 @@ close all;
                 timeout=10
             )
             
+            # Nettoyage strict de stdout / stderr
             raw_out = result.stdout + result.stderr
             clean_lines = []
-
+            ascii_chars = ("|", "+", "-", "*", "$", "%")
+            
             for line in raw_out.splitlines():
                 stripped = line.strip()
-
-                # Filter system warnings
-                if any(k in line for k in ["disabling GUI", "X11", "#####", "terminal set to", "No output will be generated"]):
-                    continue
-                
-                # RegEx cleaning for ASCII plot residues
-                if has_plot:
-                    # Ignore ASCII art pattern lines
-                    if re.search(r'[\%\*\$\|\+\-]{2,}', stripped) or re.match(r'^\s*[\d\.\-]+\s*[\$\|]', stripped):
-                        continue
-                    # Ignore isolated axis tick labels like "0 2 4 6 8 10"
-                    if re.match(r'^\s*(\d+\s*)+$', stripped) and len(stripped.split()) > 1:
-                        continue
-
-                clean_lines.append(line)
+                # Filtrer les avertissements gnuplot, GUI et graphiques ASCII
+                if not any(k in line for k in ["disabling GUI", "X11", "#####", "terminal set to", "No output will be generated"]):
+                    if not (has_plot and stripped.startswith(ascii_chars)):
+                        clean_lines.append(line)
                     
             output = "\n".join(clean_lines).strip()
 
+            # Traitement de l'image PNG
             image_path = "/tmp/output_plot.png"
             if has_plot and os.path.exists(image_path):
                 with open(image_path, "rb") as img_file:
