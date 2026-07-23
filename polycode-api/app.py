@@ -1,5 +1,6 @@
 import base64
 import os
+import re
 import subprocess
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -12,48 +13,57 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 @app.route("/run", methods=["POST"])
 def run_code():
     data = request.json
-    script = data.get("script")
+    script = data.get("script", "")
     language = data.get("language")
     user_stdin = data.get("stdin", "")
 
     output = ""
-    error = ""
     image_base64 = None
 
     try:
         if language == "octave":
-            wrapped_code = f"""
-            more off;
-            warning('off', 'all');
+            # Vérifier si l'utilisateur demande explicitement un graphique
+            has_plot = bool(re.search(r'\b(plot|fplot|bar|hist|scatter|contour|surf|mesh|stem)\b', script, re.IGNORECASE))
             
-            % Forcer Octave à utiliser explicitement le toolkit sans affichage terminal
-            graphics_toolkit("gnuplot");
-            
-            % --- CODE DE L'UTILISATEUR ---
-            {script}
-            % -----------------------------
-            
-            try
-                hold on;
-                grid on;
-                set(gca, 'GridLineStyle', '-', 'GridColor', [0.8 0.8 0.8]);
-                set(gcf, 'color', 'w');
-                
-                lims = axis();
-                plot([lims(1), lims(2)], [0, 0], 'k-', 'LineWidth', 1, 'HandleVisibility', 'off');
-                plot([0, 0], [lims(3), lims(4)], 'k-', 'LineWidth', 1, 'HandleVisibility', 'off');
-                
-                % Sauvegarde propre de l'image graphique
-                print('/tmp/output_plot.png', '-dpng', '-r150');
-            catch
-            end_try_catch
-            """
+            if has_plot:
+                # Mode Graphique
+                wrapped_code = f"""
+more off;
+warning('off', 'all');
+graphics_toolkit("gnuplot");
+
+{script}
+
+try
+    hold on;
+    grid on;
+    set(gca, 'GridLineStyle', '-', 'GridColor', [0.8 0.8 0.8]);
+    set(gcf, 'color', 'w');
+    
+    lims = axis();
+    plot([lims(1), lims(2)], [0, 0], 'k-', 'LineWidth', 1, 'HandleVisibility', 'off');
+    plot([0, 0], [lims(3), lims(4)], 'k-', 'LineWidth', 1, 'HandleVisibility', 'off');
+    
+    print('/tmp/output_plot.png', '-dpng', '-r150');
+catch
+end_try_catch
+"""
+            else:
+                # Mode 100% Texte (aucun rendu graphique, aucun résidu ASCII)
+                wrapped_code = f"""
+more off;
+warning('off', 'all');
+graphics_toolkit("none");
+
+{script}
+"""
+
             script_path = "/tmp/script_octave.m"
             with open(script_path, "w") as f:
                 f.write(wrapped_code)
 
             result = subprocess.run(
-                ["octave", script_path],
+                ["octave-cli", "--no-gui", "--silent", script_path],
                 input=user_stdin,
                 capture_output=True,
                 text=True,
@@ -62,7 +72,7 @@ def run_code():
             output = result.stdout + result.stderr
             
             image_path = "/tmp/output_plot.png"
-            if os.path.exists(image_path):
+            if has_plot and os.path.exists(image_path):
                 with open(image_path, "rb") as img_file:
                     image_base64 = base64.b64encode(img_file.read()).decode("utf-8")
                 os.remove(image_path)

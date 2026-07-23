@@ -87,7 +87,6 @@ window.runCode = async () => {
     const pLang = document.getElementById('language').value; 
 
     try {
-        // Envoi direct à votre serveur Flask (qui gère l'exécution locale pour Octave/Scilab et JDoodle pour le reste)
         const response = await fetch("https://polycode-api.onrender.com/run", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -100,21 +99,15 @@ window.runCode = async () => {
 
         const data = await response.json();
 
-        // 1. Affichage du texte dans la console plein écran
+        // 1. Affichage direct et fidèle du texte renvoyé par le backend
         let rawText = data.output !== undefined ? data.output : (data.result !== undefined ? data.result : "");
         
         if (rawText) {
+            // Uniquement un nettoyage minimal des bruits systèmes
             let cleanOutput = rawText.split('\n').filter(line => {
-                return !line.includes('%') && 
-                       !line.includes('#####') && 
-                       !line.includes('X11') && 
-                       !line.includes('display') && 
-                       !line.includes('disabling') && 
-                       !line.includes('GUI') && 
-                       !line.includes('$') && 
-                       !line.includes('#') &&
-                       !line.match(/^[0-9\s]+$/) &&
-                       !line.match(/^[\|\-\+\s\*]+$/);
+                return !line.includes('X11') && 
+                       !line.includes('disabling GUI') && 
+                       !line.includes('#####');
             }).join('\n').trim();
 
             out.innerText = cleanOutput;
@@ -124,12 +117,9 @@ window.runCode = async () => {
             out.style.color = "#f85149";
         }
 
-        // 2. Gestion intelligente de l'affichage du graphique s'il y en a un (retourné en Base64 par Flask)
+        // 2. Gestion de l'image (si générée par Flask)
         if (graphContainer && plotImage) {
-            const codeContent = document.getElementById('editor').value;
-            const hasPlotCommand = /plot|fplot|bar|hist|scatter|contour|surf/i.test(codeContent);
-
-            if (data.image && hasPlotCommand) {
+            if (data.image) {
                 plotImage.src = 'data:image/png;base64,' + data.image;
                 graphContainer.style.display = 'block';
             } else {
