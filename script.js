@@ -104,9 +104,15 @@ window.runCode = async () => {
         let rawText = data.output !== undefined ? data.output : (data.result !== undefined ? data.result : "");
         
         if (rawText) {
-            // Filtrer les lignes parasites générées par Gnuplot en mode ASCII
             let cleanOutput = rawText.split('\n').filter(line => {
-                return !line.includes('%') && !line.includes('#####') && !line.includes('X11') && !line.includes('display') && !line.match(/^[\|\-\+\s]+$/);
+                return !line.includes('%') && 
+                       !line.includes('#####') && 
+                       !line.includes('X11') && 
+                       !line.includes('display') && 
+                       !line.includes('disabling') && 
+                       !line.includes('GUI') && 
+                       !line.includes('$') && 
+                       !line.match(/^[\|\-\+\s\*]+$/);
             }).join('\n').trim();
 
             out.innerText = cleanOutput;
