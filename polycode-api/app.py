@@ -27,34 +27,28 @@ def run_code():
             warning('off', 'all');
             graphics_toolkit("gnuplot");
             
+            % Forcer le terminal gnuplot en mode silencieux pour la console
+            setterm = 0;
+            
             % --- CODE DE L'UTILISATEUR ---
             {script}
             % -----------------------------
             
             try
-                % --- MISE EN FORME AUTOMATIQUE TYPE GEOGEBRA ---
                 hold on;
                 grid on;
-                set(gca, 'GridLineStyle', '-', 'GridColor', [0.7 0.7 0.7]);
+                
+                % Style épuré type axes centraux
+                set(gca, 'Box', 'off');
+                set(gca, 'GridLineStyle', '-', 'GridColor', [0.8 0.8 0.8]);
                 set(gcf, 'color', 'w');
                 
-                % Tenter d'ajouter les axes centraux si min/max existent
-                try
-                    h = findobj(gca, 'Type', 'line');
-                    if ~isempty(h)
-                        % Récupérer les limites actuelles des axes
-                        lims = axis();
-                        xmin = lims(1); xmax = lims(2);
-                        ymin = lims(3); ymax = lims(4);
-                        
-                        % Dessiner les axes X et Y centraux
-                        line([xmin, xmax], [0, 0], 'Color', 'k', 'LineWidth', 1, 'HandleVisibility', 'off');
-                        line([0, 0], [ymin, ymax], 'Color', 'k', 'LineWidth', 1, 'HandleVisibility', 'off');
-                    end
-                catch
-                end_try_catch
+                % Tracer proprement les axes x=0 et y=0 si nécessaire
+                lims = axis();
+                plot([lims(1), lims(2)], [0, 0], 'k-', 'LineWidth', 1, 'HandleVisibility', 'off');
+                plot([0, 0], [lims(3), lims(4)], 'k-', 'LineWidth', 1, 'HandleVisibility', 'off');
                 
-                print('/tmp/output_plot.png', '-dpng');
+                print('/tmp/output_plot.png', '-dpng', '-r150');
             catch
             end_try_catch
             """
