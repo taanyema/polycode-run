@@ -25,10 +25,9 @@ def run_code():
             wrapped_code = f"""
             more off;
             warning('off', 'all');
-            graphics_toolkit("gnuplot");
             
-            % Forcer le terminal gnuplot en mode silencieux pour la console
-            setterm = 0;
+            % Forcer Octave à utiliser explicitement le toolkit sans affichage terminal
+            graphics_toolkit("gnuplot");
             
             % --- CODE DE L'UTILISATEUR ---
             {script}
@@ -37,17 +36,14 @@ def run_code():
             try
                 hold on;
                 grid on;
-                
-                % Style épuré type axes centraux
-                set(gca, 'Box', 'off');
                 set(gca, 'GridLineStyle', '-', 'GridColor', [0.8 0.8 0.8]);
                 set(gcf, 'color', 'w');
                 
-                % Tracer proprement les axes x=0 et y=0 si nécessaire
                 lims = axis();
                 plot([lims(1), lims(2)], [0, 0], 'k-', 'LineWidth', 1, 'HandleVisibility', 'off');
                 plot([0, 0], [lims(3), lims(4)], 'k-', 'LineWidth', 1, 'HandleVisibility', 'off');
                 
+                % Sauvegarde propre de l'image graphique
                 print('/tmp/output_plot.png', '-dpng', '-r150');
             catch
             end_try_catch

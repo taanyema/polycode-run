@@ -101,11 +101,15 @@ window.runCode = async () => {
         const data = await response.json();
 
         // 1. Affichage du texte dans la console plein écran
-        if (data.output !== undefined) {
-            out.innerText = data.output;
-            out.style.color = "#7ee787";
-        } else if (data.result !== undefined) {
-            out.innerText = data.result;
+        let rawText = data.output !== undefined ? data.output : (data.result !== undefined ? data.result : "");
+        
+        if (rawText) {
+            // Filtrer les lignes parasites générées par Gnuplot en mode ASCII
+            let cleanOutput = rawText.split('\n').filter(line => {
+                return !line.includes('%') && !line.includes('#####') && !line.match(/^[\|\-\+\s]+$/);
+            }).join('\n').trim();
+
+            out.innerText = cleanOutput;
             out.style.color = "#7ee787";
         } else {
             out.innerText = "⚠️ Erreur : " + (data.error || JSON.stringify(data));
