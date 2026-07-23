@@ -112,6 +112,7 @@ window.runCode = async () => {
                        !line.includes('disabling') && 
                        !line.includes('GUI') && 
                        !line.includes('$') && 
+                       !line.match(/^[0-9\s]+$/) &&
                        !line.match(/^[\|\-\+\s\*]+$/);
             }).join('\n').trim();
 
