@@ -21,11 +21,39 @@ def run_code():
     image_base64 = None
 
     try:
-        if language in ["octave", "scilab"]:
+        if language == "octave":
             wrapped_code = f"""
+            more off;
+            warning('off', 'all');
             graphics_toolkit("gnuplot");
+            
+            % --- CODE DE L'UTILISATEUR ---
             {script}
+            % -----------------------------
+            
             try
+                % --- MISE EN FORME AUTOMATIQUE TYPE GEOGEBRA ---
+                hold on;
+                grid on;
+                set(gca, 'GridLineStyle', '-', 'GridColor', [0.7 0.7 0.7]);
+                set(gcf, 'color', 'w');
+                
+                % Tenter d'ajouter les axes centraux si min/max existent
+                try
+                    h = findobj(gca, 'Type', 'line');
+                    if ~isempty(h)
+                        % Récupérer les limites actuelles des axes
+                        lims = axis();
+                        xmin = lims(1); xmax = lims(2);
+                        ymin = lims(3); ymax = lims(4);
+                        
+                        % Dessiner les axes X et Y centraux
+                        line([xmin, xmax], [0, 0], 'Color', 'k', 'LineWidth', 1, 'HandleVisibility', 'off');
+                        line([0, 0], [ymin, ymax], 'Color', 'k', 'LineWidth', 1, 'HandleVisibility', 'off');
+                    end
+                catch
+                end_try_catch
+                
                 print('/tmp/output_plot.png', '-dpng');
             catch
             end_try_catch
