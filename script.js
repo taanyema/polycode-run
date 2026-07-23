@@ -123,9 +123,12 @@ window.runCode = async () => {
             out.style.color = "#f85149";
         }
 
-        // 2. Gestion automatique de l'affichage du graphique s'il y en a un (retourné en Base64 par Flask)
+        // 2. Gestion intelligente de l'affichage du graphique s'il y en a un (retourné en Base64 par Flask)
         if (graphContainer && plotImage) {
-            if (data.image) {
+            const codeContent = document.getElementById('editor').value;
+            const hasPlotCommand = /plot|fplot|bar|hist|scatter|contour|surf/i.test(codeContent);
+
+            if (data.image && hasPlotCommand) {
                 plotImage.src = 'data:image/png;base64,' + data.image;
                 graphContainer.style.display = 'block';
             } else {
