@@ -106,7 +106,7 @@ window.runCode = async () => {
         if (rawText) {
             // Filtrer les lignes parasites générées par Gnuplot en mode ASCII
             let cleanOutput = rawText.split('\n').filter(line => {
-                return !line.includes('%') && !line.includes('#####') && !line.match(/^[\|\-\+\s]+$/);
+                return !line.includes('%') && !line.includes('#####') && !line.includes('X11') && !line.includes('display') && !line.match(/^[\|\-\+\s]+$/);
             }).join('\n').trim();
 
             out.innerText = cleanOutput;
