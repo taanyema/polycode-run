@@ -47,6 +47,7 @@ window.sendMessage = async () => {
         // Suppression du chargement
         const loader = document.getElementById('loading');
         if (loader) loader.remove();
+        console.log(data);
 
         if (data.response) {
             messages.innerHTML += `<p class="ai-msg"><b>IA :</b> ${data.response.replace(/\n/g, "<br>")}</p>`;

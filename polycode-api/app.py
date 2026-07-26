@@ -160,18 +160,31 @@ def ai_help():
     data = request.json or {}
     code = data.get("code", "")
     q = data.get("question", "")
+    system_prompt = data.get("system_prompt", "") # <-- Récupération du prompt système
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+    
+    # Construction du payload avec instruction système si elle existe
     payload = {
         "contents": [{
-            "parts": [{"text": f"Code:\n{code}\n\nQuestion: {q}\nRéponds brièvement en français."}]
+            "parts": [{"text": f"Code:\n{code}\n\nQuestion: {q}"}]
         }]
     }
+    
+    if system_prompt:
+        payload["system_instruction"] = {
+            "parts": [{"text": system_prompt}]
+        }
 
     try:
         import requests
         res = requests.post(url, json=payload, timeout=10)
         d = res.json()
+        
+        # Sécurité pour attraper l'erreur exacte si l'API Gemini renvoie un problème
+        if "error" in d:
+            return jsonify({"error": d["error"].get("message", "Erreur Gemini")}), 500
+
         text = d.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "Pas de réponse claire.")
         return jsonify({"response": text})
     except Exception as e:
