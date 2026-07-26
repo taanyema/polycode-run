@@ -160,32 +160,38 @@ def ai_help():
     data = request.json or {}
     code = data.get("code", "")
     q = data.get("question", "")
-    system_prompt = data.get("system_prompt", "") # <-- Récupération du prompt système
+    system_prompt = data.get("system_prompt", "")
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+    # URL et modèle Groq
+    url = "https://api.groq.com/openai/v1/chat/completions"
     
-    # Construction du payload avec instruction système si elle existe
-    payload = {
-        "contents": [{
-            "parts": [{"text": f"Code:\n{code}\n\nQuestion: {q}"}]
-        }]
-    }
-    
+    # Construction des messages au format OpenAI / Groq
+    messages = []
     if system_prompt:
-        payload["system_instruction"] = {
-            "parts": [{"text": system_prompt}]
-        }
+        messages.append({"role": "system", "content": system_prompt})
+    
+    user_content = f"Code:\n{code}\n\nQuestion: {q}"
+    messages.append({"role": "user", "content": user_content})
+
+    payload = {
+        "model": "llama-3.3-70b-versatile", # Ou le modèle Groq que tu utilises (ex: llama3-8b-8192)
+        "messages": messages
+    }
+
+    headers = {
+        "Authorization": f"Bearer {GEMINI_API_KEY}", # Tu peux garder le nom de ta variable d'env sur Render
+        "Content-Type": "application/json"
+    }
 
     try:
         import requests
-        res = requests.post(url, json=payload, timeout=10)
+        res = requests.post(url, json=payload, headers=headers, timeout=10)
         d = res.json()
         
-        # Sécurité pour attraper l'erreur exacte si l'API Gemini renvoie un problème
         if "error" in d:
-            return jsonify({"error": d["error"].get("message", "Erreur Gemini")}), 500
+            return jsonify({"error": d["error"].get("message", "Erreur Groq")}), 500
 
-        text = d.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "Pas de réponse claire.")
+        text = d.get("choices", [{}])[0].get("message", {}).get("content", "Pas de réponse claire.")
         return jsonify({"response": text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
