@@ -29,26 +29,16 @@ window.sendMessage = async () => {
     messages.innerHTML += `<p id="loading" class="ai-msg"><i>⏳ Analyse en cours...</i></p>`;
 
     try {
-        const apiKey = window.opener ? window.opener.gK() : ""; 
-
-        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        // Appel de ton serveur Flask sur Render (la clé secrète est gérée en toute sécurité côté serveur)
+        const response = await fetch("https://polycode-api.onrender.com/ai", {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: "llama-3.3-70b-versatile",
-                temperature: 0.2,
-                top_p: 0.9,
-                max_tokens: 2048,
-                messages: [
-                    { role: "system", content: SYSTEM_PROMPT },
-                    { 
-                        role: "user", 
-                        content: `Code actuel :\n${code}\n\nQuestion : ${userQuery}\n\nAnalyse le programme avant de répondre. Si tu proposes du code, vérifie qu'il compile.` 
-                    }
-                ]
+                code: code,
+                question: userQuery,
+                system_prompt: SYSTEM_PROMPT
             })
         });
 
@@ -58,11 +48,10 @@ window.sendMessage = async () => {
         const loader = document.getElementById('loading');
         if (loader) loader.remove();
 
-        if (data.choices && data.choices[0]) {
-            const responseText = data.choices[0].message.content;
-            messages.innerHTML += `<p class="ai-msg"><b>IA :</b> ${responseText.replace(/\n/g, "<br>")}</p>`;
+        if (data.response) {
+            messages.innerHTML += `<p class="ai-msg"><b>IA :</b> ${data.response.replace(/\n/g, "<br>")}</p>`;
         } else {
-            messages.innerHTML += `<p style="color:#f85149;">Erreur : ${data.error?.message || "Réponse invalide"}</p>`;
+            messages.innerHTML += `<p style="color:#f85149;">Erreur : ${data.error || "Réponse invalide du serveur"}</p>`;
         }
         
         messages.scrollTop = messages.scrollHeight;
@@ -70,7 +59,7 @@ window.sendMessage = async () => {
     } catch (e) {
         const loader = document.getElementById('loading');
         if (loader) loader.remove();
-        messages.innerHTML += `<p style="color:#f85149;">Erreur : Impossible de contacter l'IA.</p>`;
+        messages.innerHTML += `<p style="color:#f85149;">Erreur : Impossible de contacter le serveur d'aide IA.</p>`;
     }
 };
 
