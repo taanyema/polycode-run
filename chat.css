@@ -117,3 +117,19 @@ body {
 .close-btn:hover {
     color: #ff4d4d;
 }
+
+/* --- Ajouts pour les blocs de code et la coloration syntaxique --- */
+.ai-msg pre {
+    background: #1e1e1e;
+    border-radius: 8px;
+    margin: 12px 0;
+    overflow-x: auto;
+    border: 1px solid #30363d;
+}
+
+.ai-msg code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    background: transparent;
+    padding: 0;
+}

@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aide IA - PolyCode Pro</title>
     <link rel="stylesheet" href="chat.css">
+    
+    <!-- 1. Thème sombre pour la coloration syntaxique -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    
+    <!-- 2. Scripts Marked et Highlight.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 </head>
 <body>
 
@@ -15,12 +22,11 @@
         <button class="close-btn" onclick="closeAIChat()">×</button>
     </div>
 
-    <!-- Zone de messages qui prend toute la place -->
+    <!-- Zone de messages -->
     <div id="chat-messages" class="chat-messages"></div>
 
-    <!-- Zone de saisie qui restera en bas -->
+    <!-- Zone de saisie -->
     <div class="chat-input-area">
-        <!-- Remplace l'input par un textarea -->
         <textarea id="user-input" placeholder="Posez votre question..."></textarea>
         <button onclick="sendMessage()">Envoyer</button>
     </div>

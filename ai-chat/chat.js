@@ -11,6 +11,78 @@ export function openAIChat() {
     window.open('chat.html', '_blank', `width=${width},height=${height},top=${top},left=${left}`);
 }
 
+// Fonction pour afficher proprement le message de l'IA avec Markdown, Coloration et Boutons
+function displayAIMessage(rawResponseText) {
+    const messagesContainer = document.getElementById('chat-messages');
+    
+    let messageDiv = document.createElement('div');
+    messageDiv.className = "ai-msg";
+    
+    // Si la fonction globale "marked" est disponible, on l'utilise pour le rendu pro
+    if (window.marked) {
+        messageDiv.innerHTML = "<b>IA :</b><br>" + window.marked.parse(rawResponseText);
+    } else {
+        messageDiv.innerHTML = `<b>IA :</b> ${rawResponseText.replace(/\n/g, "<br>")}`;
+    }
+    
+    messagesContainer.appendChild(messageDiv);
+
+    // Appliquer highlight.js et ajouter les boutons sur chaque bloc de code
+    if (window.hljs) {
+        messageDiv.querySelectorAll('pre code').forEach((block) => {
+            window.hljs.highlightElement(block);
+
+            let pre = block.parentElement;
+            
+            // Créer l'en-tête du bloc de code
+            let header = document.createElement('div');
+            header.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: #21252b; padding: 6px 12px; font-size: 12px; color: #abb2bf; border-top-left-radius: 6px; border-top-right-radius: 6px;";
+
+            let langClass = Array.from(block.classList).find(c => c.startsWith('language-'));
+            let langName = langClass ? langClass.replace('language-', '').toUpperCase() : 'CODE';
+
+            let langSpan = document.createElement('span');
+            langSpan.innerText = langName;
+            header.appendChild(langSpan);
+
+            let btnContainer = document.createElement('div');
+            btnContainer.style.cssText = "display: flex; gap: 12px;";
+
+            // Bouton Copier
+            let copyBtn = document.createElement('button');
+            copyBtn.innerHTML = '📋 Copier';
+            copyBtn.style.cssText = "background: transparent; border: none; color: #abb2bf; cursor: pointer; font-size: 12px;";
+            copyBtn.onclick = () => {
+                navigator.clipboard.writeText(block.innerText);
+                copyBtn.innerHTML = '✅ Copié !';
+                setTimeout(() => copyBtn.innerHTML = '📋 Copier', 2000);
+            };
+
+            // Bouton Enregistrer / Télécharger
+            let saveBtn = document.createElement('button');
+            saveBtn.innerHTML = '💾 Enregistrer';
+            saveBtn.style.cssText = "background: transparent; border: none; color: #abb2bf; cursor: pointer; font-size: 12px;";
+            saveBtn.onclick = () => {
+                let blob = new Blob([block.innerText], { type: 'text/plain' });
+                let a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                let ext = langName.toLowerCase() === 'c' ? 'c' : (langName.toLowerCase() === 'python' ? 'py' : 'txt');
+                a.download = `snippet.${ext}`;
+                a.click();
+            };
+
+            btnContainer.appendChild(copyBtn);
+            btnContainer.appendChild(saveBtn);
+            header.appendChild(btnContainer);
+
+            pre.style.cssText = "background: #1e1e1e; border-radius: 8px; margin: 12px 0; overflow: hidden; border: 1px solid #3e3e3e;";
+            pre.insertBefore(header, block);
+        });
+    }
+
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
 // 2. Fonction d'envoi
 window.sendMessage = async () => {
     const input = document.getElementById('user-input');
@@ -27,9 +99,9 @@ window.sendMessage = async () => {
 
     // Indicateur de chargement
     messages.innerHTML += `<p id="loading" class="ai-msg"><i>⏳ Analyse en cours...</i></p>`;
+    messages.scrollTop = messages.scrollHeight;
 
     try {
-        // Appel de ton serveur Flask sur Render (la clé secrète est gérée en toute sécurité côté serveur)
         const response = await fetch("https://polycode-api.onrender.com/ai", {
             method: 'POST',
             headers: {
@@ -47,10 +119,9 @@ window.sendMessage = async () => {
         // Suppression du chargement
         const loader = document.getElementById('loading');
         if (loader) loader.remove();
-        console.log(data);
 
         if (data.response) {
-            messages.innerHTML += `<p class="ai-msg"><b>IA :</b> ${data.response.replace(/\n/g, "<br>")}</p>`;
+            displayAIMessage(data.response);
         } else {
             messages.innerHTML += `<p style="color:#f85149;">Erreur : ${data.error || "Réponse invalide du serveur"}</p>`;
         }
@@ -74,12 +145,12 @@ window.exportChatToMarkdown = () => {
     const chatContainer = document.getElementById('chat-messages');
     let markdownContent = "# Journal de bord - PolyCode Pro\n\n";
     
-    const messages = chatContainer.querySelectorAll('p');
+    const messages = chatContainer.querySelectorAll('p, div.ai-msg');
     messages.forEach(msg => {
         const text = msg.innerText;
         if (text.startsWith("Vous :")) {
             markdownContent += `## ${text}\n\n`;
-        } else if (text.startsWith("IA :")) {
+        } else if (text.includes("IA :")) {
             markdownContent += `> ${text}\n\n---\n`;
         }
     });
@@ -95,5 +166,8 @@ window.exportChatToMarkdown = () => {
 window.openAIChat = openAIChat;
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('btn-envoyer').addEventListener('click', sendMessage);
+    const btnEnvoyer = document.getElementById('btn-envoyer');
+    if (btnEnvoyer) {
+        btnEnvoyer.addEventListener('click', sendMessage);
+    }
 });
