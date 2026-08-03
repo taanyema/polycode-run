@@ -44,7 +44,7 @@ body {
 .chat-messages {
     flex: 1;
     overflow-y: auto;
-    padding: 15px;
+    padding: 15px 5px; /* Réduit l'espace sur les côtés pour élargir l'affichage */
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -59,11 +59,18 @@ body {
     font-size: 14px;
 }
 
-/* Bulles */
+/* Bulles de l'IA prenant toute la largeur disponible */
 .ai-msg {
     background-color: #21262d;
-    align-self: flex-start;
+    align-self: stretch;        /* Étire la bulle sur toute la largeur du conteneur */
+    box-sizing: border-box;     /* Intègre les bordures et paddings dans la largeur */
     border: 1px solid #30363d;
+    padding: 12px 14px;
+    border-radius: 12px;
+    line-height: 1.4;
+    font-size: 14px;
+    white-space: pre-wrap;      
+    word-break: break-word;     
 }
 
 .user-msg {
@@ -118,18 +125,22 @@ body {
     color: #ff4d4d;
 }
 
-/* --- Ajouts pour les blocs de code et la coloration syntaxique --- */
+/* --- Blocs de code et coloration syntaxique isolés --- */
 .ai-msg pre {
-    background: #1e1e1e;
-    border-radius: 8px;
-    margin: 12px 0;
-    overflow-x: auto;
+    background: #161b22 !important;
+    border-radius: 6px;
+    margin: 10px 0;
+    padding: 10px;
+    overflow-x: auto;            /* Seul le code défile horizontalement */
     border: 1px solid #30363d;
+    white-space: pre;            /* Garde la mise en forme exacte du code source */
 }
 
 .ai-msg code {
     font-family: 'Courier New', Courier, monospace;
     font-size: 13px;
-    background: transparent;
+    background: transparent !important;
+    color: #e6edf3 !important;
     padding: 0;
+    white-space: pre;            /* Empêche le code de casser les lignes de manière anarchique */
 }
