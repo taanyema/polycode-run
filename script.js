@@ -1,7 +1,10 @@
 import { openAIChat } from './ai-chat/chat.js';
+import { initCalculator } from './calculator/calc.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-console.log("Étape 1");
+
+// Initialisation de la calculatrice au démarrage
+initCalculator();
 
 const firebaseConfig = {
     apiKey: "AIzaSyCAo1mrf8bwHd3rWdmfxzVa_6OabDJIRgw",
@@ -326,11 +329,6 @@ window.toggleLanguage = () => {
     }
 };
 
-window.ouvrirCalculatrice = () => {
-    alert("Ouverture de la calculatrice scientifique...");
-    window.open('https://www.google.com/search?q=calculatrice', '_blank');
-};
-
 // Exposer les fonctions au DOM
 window.runCode = runCode;
 window.toggleMenu = toggleMenu;
@@ -347,7 +345,6 @@ window.clearEditor = clearEditor;
 window.deconnexion = deconnexion;
 window.closeConsole = closeConsole;
 window.toggleLanguage = toggleLanguage;
-window.ouvrirCalculatrice = ouvrirCalculatrice;
 console.log("Étape 3");
 
 // Événement Touche "Entrée" et "Tab" sur l'éditeur

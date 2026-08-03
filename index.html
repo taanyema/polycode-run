@@ -12,6 +12,7 @@
     
     <!-- Liens vers tes fichiers séparés -->
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="calculator/calc.css">
     
     <link id="prism-theme" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -27,24 +28,30 @@
     <div id="drawer-overlay" class="drawer-overlay" onclick="toggleMenu()"></div>
     <div id="drawer">
         <h3 style="margin-top:0;">⚙️ Options PolyCode</h3>
+        
         <div class="drawer-section">
             <h4>Fichiers & Cloud</h4>
             <div class="menu-item">📂 Gestion Multi-Tabs</div>
             <div class="menu-item">☁️ Synchronisation Cloud</div>
-            <div class="menu-item">📄 Exporter en PDF</div>
-            <div class="menu-item">📥 Importer URL</div>
         </div>
+
         <div class="drawer-section">
             <h4>Élite Tools</h4>
-            <div class="menu-item">🎙️ Dictée Vocale Code</div>
             <div class="menu-item">📝 Formatteur Automatique</div>
             <div class="menu-item">🔍 Recherche / Remplacer</div>
-            <div class="menu-item">⚡ Mode Performance Turbo</div>
         </div>
+
         <div class="drawer-section">
             <h4>Sécurité</h4>
-            <div class="menu-item">🔌 Économie de Données</div>
             <div class="menu-item">🔐 Coffre-fort API</div>
+        </div>
+
+        <!-- 💡 Nouvelle section d'aide intégrée -->
+        <div class="drawer-section">
+            <h4>📖 Aide & Guide</h4>
+            <div class="menu-item" onclick="toggleHelpModal()" style="cursor:pointer; background: #21262d; border-radius: 6px; padding: 8px;">
+                ℹ️ À propos de l'application
+            </div>
         </div>
     </div>
 
