@@ -129,3 +129,47 @@
 .copy-btn:active {
     background: #30363d;
 }
+
+.calc-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #21262d;
+    padding-bottom: 10px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: #161b22;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 650;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: #21262d;
+    color: #58a6ff;
+    border-color: #58a6ff;
+}
+
+.calc-action-btn {
+    width: 100%;
+    background: #238636;
+    color: #ffffff;
+    border: 1px solid rgba(240,246,252,0.1);
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.calc-action-btn:active {
+    background: #2ea043;
+}
